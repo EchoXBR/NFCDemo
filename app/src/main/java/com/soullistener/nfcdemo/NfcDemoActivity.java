@@ -9,6 +9,7 @@ import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import java.io.IOException;
@@ -23,11 +24,14 @@ public class NfcDemoActivity extends AppCompatActivity {
     private NfcAdapter mNfcAdapter;
     private PendingIntent mPendingIntent;
 
+    private TextView tvContent;
+
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         mNfcAdapter = NfcAdapter.getDefaultAdapter(this);
+        tvContent = findViewById(R.id.tv_content);
         if (mNfcAdapter == null) {
             Toast.makeText(this, "设备不支持NFC！", Toast.LENGTH_LONG).show();
             finish();
@@ -73,15 +77,29 @@ public class NfcDemoActivity extends AppCompatActivity {
             return;
         }
 
-//        try {
-//            writeBlock(tag, 4*6+2, "9999999999      ".getBytes());
-//        } catch (IOException e) {
-//            e.printStackTrace();
-//        }
-
-        ArrayList data = new ArrayList();
+        //                try {
+        //                    writeBlock(tag, 4*6+2, "9999999999      ".getBytes());
+        //                } catch (IOException e) {
+        //                    e.printStackTrace();
+        //                }
+        tvContent.setText("写入数据\n");
         try {
+            byte[] blockbyte = new byte[16];
+            blockbyte[2] = 0x55;
+            blockbyte[3] = 0x55;
+            blockbyte[4] = 0x55;
+            blockbyte[5] = 0x55;
+            writeBlock(tag, 4, blockbyte);
+            tvContent.append("读取数据\n");
+            ArrayList data = new ArrayList();
+
             data = readTag(tag);
+            if (data != null) {
+                tvContent.append(data.toString());
+            } else {
+                tvContent.append("null");
+            }
+
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -100,7 +118,7 @@ public class NfcDemoActivity extends AppCompatActivity {
         try {
             // 获取TAG中包含的扇区数
             int sectorCount = mTag.getSectorCount();
-            for (int j = 5; j < 7; j++) {
+            for (int j = 0; j < 4; j++) {
                 int bCount;//当前扇区的块数
                 int bIndex;//当前扇区第一块
 
@@ -117,7 +135,7 @@ public class NfcDemoActivity extends AppCompatActivity {
                     bIndex = mTag.sectorToBlock(j);
                     for (int i = 0; i < bCount; i++) {
                         byte[] data = mTag.readBlock(bIndex);
-                        Log.e("第"+i+"数据:",convertHexToString(bytesToHexString(data)));
+                        Log.e("第" + i + "数据:", convertHexToString(bytesToHexString(data)));
                         metaInfo.add(bytesToHexString(data));
                         bIndex++;
                     }
@@ -145,6 +163,7 @@ public class NfcDemoActivity extends AppCompatActivity {
      * @param tag
      * @param block
      * @param blockbyte
+     *
      * @throws IOException
      */
     public void writeBlock(Tag tag, int block, byte[] blockbyte) throws IOException {
@@ -176,7 +195,6 @@ public class NfcDemoActivity extends AppCompatActivity {
 
         }
     }
-
 
 
     @Override
@@ -216,7 +234,9 @@ public class NfcDemoActivity extends AppCompatActivity {
 
     /**
      * 16进制byte数组转换为10进制字符串
+     *
      * @param hex
+     *
      * @return
      */
     public String convertHexToString(String hex) {

@@ -64,14 +64,15 @@ public class M1CardUtils {
         for (String tech : techList) {
             Log.e("TagTech",tech);
             if (tech.contains(cardType)) {
+                Toast.makeText(activity, "卡类型："+cardType, Toast.LENGTH_LONG).show();
                 hasCardType = true;
                 break;
             }
         }
 
-        if (!hasCardType) {
-            Toast.makeText(activity, "不支持"+cardType+"卡", Toast.LENGTH_LONG).show();
-        }
+//        if (!hasCardType) {
+//            Toast.makeText(activity, "不支持"+cardType+"卡", Toast.LENGTH_LONG).show();
+//        }
 
         return hasCardType;
     }
@@ -135,6 +136,8 @@ public class M1CardUtils {
             }
         }
     }
+
+
 
     /**
      * 改写数据
